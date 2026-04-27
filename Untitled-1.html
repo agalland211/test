@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TEAM WOLF</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0f;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      font-family: 'Bebas Neue', sans-serif;
+    }
+
+    /* Particules de fond */
+    .particles {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: drift linear infinite;
+      opacity: 0;
+    }
+
+    /* Grille animée en fond */
+    .grid-bg {
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,60,0,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,60,0,0.05) 1px, transparent 1px);
+      background-size: 60px 60px;
+      animation: gridMove 8s linear infinite;
+      z-index: 0;
+    }
+
+    /* Lueur centrale */
+    .glow-bg {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,60,0,0.12) 0%, transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      animation: pulse-glow 2.5s ease-in-out infinite;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+    }
+
+    /* Ligne décorative */
+    .line {
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ff3c00, #ff9d00, #ff3c00, transparent);
+      margin: 0 auto 20px;
+      animation: expandLine 1s ease-out 0.3s forwards;
+    }
+
+    /* TEAM */
+    .word-team {
+      display: block;
+      font-size: clamp(60px, 10vw, 120px);
+      letter-spacing: 0.35em;
+      color: #fff;
+      opacity: 0;
+      transform: translateY(-60px) scaleX(0.6);
+      animation: dropIn 0.8s cubic-bezier(0.22,1,0.36,1) 0.8s forwards;
+      text-shadow: 0 0 40px rgba(255,255,255,0.15);
+      position: relative;
+    }
+
+    /* WOLF */
+    .word-wolf {
+      display: block;
+      font-size: clamp(90px, 16vw, 200px);
+      letter-spacing: 0.15em;
+      line-height: 0.85;
+      background: linear-gradient(135deg, #ff3c00 0%, #ff9d00 50%, #ff3c00 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      opacity: 0;
+      transform: translateY(80px) scaleX(1.3);
+      animation:
+        riseUp 1s cubic-bezier(0.22,1,0.36,1) 1.2s forwards,
+        gradientShift 3s ease-in-out 2.5s infinite;
+      filter: drop-shadow(0 0 30px rgba(255,80,0,0.5));
+    }
+
+    /* Sous-titre */
+    .sub {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: clamp(12px, 2vw, 18px);
+      letter-spacing: 0.6em;
+      color: rgba(255,157,0,0.7);
+      margin-top: 16px;
+      opacity: 0;
+      animation: fadeSlideUp 0.8s ease 2.2s forwards;
+      text-transform: uppercase;
+    }
+
+    .line-bottom {
+      width: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ff9d00, #ff3c00, #ff9d00, transparent);
+      margin: 16px auto 0;
+      animation: expandLine 1s ease-out 2s forwards;
+    }
+
+    /* Effet de scan (ligne qui passe) */
+    .scan-line {
+      position: fixed;
+      top: -4px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent 0%, rgba(255,100,0,0.6) 50%, transparent 100%);
+      animation: scanDown 4s linear 1.5s infinite;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* Lettres individuelles de WOLF qui vibrent */
+    .wolf-letters {
+      display: block;
+    }
+
+    .wolf-letters span {
+      display: inline-block;
+      animation: letterFloat 3s ease-in-out infinite;
+    }
+    .wolf-letters span:nth-child(1) { animation-delay: 0s; }
+    .wolf-letters span:nth-child(2) { animation-delay: 0.2s; }
+    .wolf-letters span:nth-child(3) { animation-delay: 0.4s; }
+    .wolf-letters span:nth-child(4) { animation-delay: 0.6s; }
+
+    /* Coins décoratifs */
+    .corner {
+      position: fixed;
+      width: 60px;
+      height: 60px;
+      opacity: 0;
+      animation: fadeIn 0.5s ease 2.5s forwards;
+    }
+    .corner-tl { top: 20px; left: 20px; border-top: 2px solid #ff3c00; border-left: 2px solid #ff3c00; }
+    .corner-tr { top: 20px; right: 20px; border-top: 2px solid #ff3c00; border-right: 2px solid #ff3c00; }
+    .corner-bl { bottom: 20px; left: 20px; border-bottom: 2px solid #ff3c00; border-left: 2px solid #ff3c00; }
+    .corner-br { bottom: 20px; right: 20px; border-bottom: 2px solid #ff3c00; border-right: 2px solid #ff3c00; }
+
+    /* ======= KEYFRAMES ======= */
+
+    @keyframes dropIn {
+      to { opacity: 1; transform: translateY(0) scaleX(1); }
+    }
+
+    @keyframes riseUp {
+      to { opacity: 1; transform: translateY(0) scaleX(1); }
+    }
+
+    @keyframes expandLine {
+      to { width: 300px; }
+    }
+
+    @keyframes fadeSlideUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    @keyframes letterFloat {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      25%       { transform: translateY(-8px) rotate(-1deg); }
+      75%       { transform: translateY(4px) rotate(1deg); }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      50%       { transform: translate(-50%, -50%) scale(1.3); opacity: 0.7; }
+    }
+
+    @keyframes scanDown {
+      0%   { top: -4px; opacity: 0; }
+      5%   { opacity: 1; }
+      95%  { opacity: 1; }
+      100% { top: 100vh; opacity: 0; }
+    }
+
+    @keyframes gridMove {
+      from { background-position: 0 0; }
+      to   { background-position: 60px 60px; }
+    }
+
+    @keyframes drift {
+      0%   { transform: translateY(0) translateX(0); opacity: 0; }
+      10%  { opacity: 1; }
+      90%  { opacity: 0.7; }
+      100% { transform: translateY(-100vh) translateX(var(--dx, 20px)); opacity: 0; }
+    }
+
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="grid-bg"></div>
+  <div class="glow-bg"></div>
+  <div class="scan-line"></div>
+  <div class="particles" id="particles"></div>
+
+  <!-- Coins décoratifs -->
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <div class="container">
+    <div class="line"></div>
+    <div class="word-team">TEAM</div>
+    <div class="word-wolf">
+      <span class="wolf-letters">
+        <span>W</span><span>O</span><span>L</span><span>F</span>
+      </span>
+    </div>
+    <div class="line-bottom"></div>
+    <div class="sub">— established forever —</div>
+  </div>
+
+  <script>
+    // Palettes de couleurs (toutes les 30s)
+    const themes = [
+      { name: 'fire',    c1: '#ff3c00', c2: '#ff9d00', glow: '255,80,0',   team: '#ffffff', sub: 'rgba(255,157,0,0.7)' },
+      { name: 'ice',     c1: '#00cfff', c2: '#00f0ff', glow: '0,200,255',  team: '#e0f8ff', sub: 'rgba(0,220,255,0.7)' },
+      { name: 'toxic',   c1: '#39ff14', c2: '#b0ff57', glow: '80,255,0',   team: '#eaffdc', sub: 'rgba(120,255,50,0.7)' },
+      { name: 'royal',   c1: '#b44fff', c2: '#ff52d4', glow: '180,80,255', team: '#f5e6ff', sub: 'rgba(200,100,255,0.7)' },
+      { name: 'gold',    c1: '#ffd700', c2: '#fff04d', glow: '255,210,0',  team: '#fffbe0', sub: 'rgba(255,220,50,0.7)' },
+    ];
+
+    let currentTheme = 0;
+
+    function applyTheme(theme, transition = true) {
+      const wolf = document.querySelector('.word-wolf');
+      const team = document.querySelector('.word-team');
+      const sub  = document.querySelector('.sub');
+      const glow = document.querySelector('.glow-bg');
+      const grid = document.querySelector('.grid-bg');
+      const scan = document.querySelector('.scan-line');
+      const corners = document.querySelectorAll('.corner');
+      const lines = document.querySelectorAll('.line, .line-bottom');
+
+      const dur = transition ? '1.5s' : '0s';
+
+      wolf.style.transition = `filter ${dur} ease`;
+      wolf.style.background = `linear-gradient(135deg, ${theme.c1} 0%, ${theme.c2} 50%, ${theme.c1} 100%)`;
+      wolf.style.backgroundSize = '200% 200%';
+      wolf.style.webkitBackgroundClip = 'text';
+      wolf.style.webkitTextFillColor = 'transparent';
+      wolf.style.backgroundClip = 'text';
+      wolf.style.filter = `drop-shadow(0 0 30px rgba(${theme.glow},0.5))`;
+
+      team.style.transition = `color ${dur} ease, text-shadow ${dur} ease`;
+      team.style.color = theme.team;
+      team.style.textShadow = `0 0 40px rgba(${theme.glow},0.2)`;
+
+      sub.style.transition = `color ${dur} ease`;
+      sub.style.color = theme.sub;
+
+      glow.style.transition = `background ${dur} ease`;
+      glow.style.background = `radial-gradient(circle, rgba(${theme.glow},0.12) 0%, transparent 70%)`;
+
+      grid.style.transition = `background-image ${dur} ease`;
+      grid.style.backgroundImage = `
+        linear-gradient(rgba(${theme.glow},0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(${theme.glow},0.05) 1px, transparent 1px)`;
+
+      scan.style.transition = `background ${dur} ease`;
+      scan.style.background = `linear-gradient(90deg, transparent 0%, rgba(${theme.glow},0.6) 50%, transparent 100%)`;
+
+      corners.forEach(c => {
+        c.style.transition = `border-color ${dur} ease`;
+        c.style.borderColor = theme.c1;
+      });
+
+      lines.forEach(l => {
+        l.style.transition = `background ${dur} ease`;
+        l.style.background = `linear-gradient(90deg, transparent, ${theme.c1}, ${theme.c2}, ${theme.c1}, transparent)`;
+      });
+
+      // Recolore les particules existantes
+      document.querySelectorAll('.particle').forEach(p => {
+        p.style.background = Math.random() > 0.5 ? theme.c1 : theme.c2;
+      });
+    }
+
+    function nextTheme() {
+      currentTheme = (currentTheme + 1) % themes.length;
+      applyTheme(themes[currentTheme]);
+    }
+
+    // Génération de particules
+    const particleContainer = document.getElementById('particles');
+    for (let i = 0; i < 60; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      const size = Math.random() * 3 + 1;
+      p.style.cssText = `
+        width: ${size}px;
+        height: ${size}px;
+        left: ${Math.random() * 100}%;
+        top: ${Math.random() * 100 + 100}%;
+        background: ${Math.random() > 0.5 ? '#ff3c00' : '#ff9d00'};
+        --dx: ${(Math.random() - 0.5) * 80}px;
+        animation-duration: ${Math.random() * 6 + 4}s;
+        animation-delay: ${Math.random() * 8}s;
+      `;
+      particleContainer.appendChild(p);
+    }
+
+    // Changement toutes les 10secondes
+    setInterval(nextTheme, 10000);
+  </script>
+</body>
+</html>
